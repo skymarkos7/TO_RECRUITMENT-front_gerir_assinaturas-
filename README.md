@@ -13,7 +13,8 @@
     - passando id por url
     - Tecnica de neumorphism básico na tela *detalhes de um cadastro* fazendo o card flutuar
 
-### **Comandos para rodar projeto localmente:**
+![](src/assets/overview.gif)
+
 
 ### Clonar projeto
 ```bash
