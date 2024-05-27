@@ -26,11 +26,6 @@ s
       bordered
     >
       <q-list >
-        <!-- <q-item-label
-          header
-        >
-          Início
-        </q-item-label> -->
 
         <EssentialLink
 
@@ -58,24 +53,24 @@ const linksList = [
     target:"_self"
   },
   {
-    title: 'Cadastros',
-    caption: 'Listagem de cadastros',
+    title: 'Usuario',
+    caption: 'Listagem de usuários',
     icon: 'group',
-    href: '#/cadastros',
+    href: '#/user',
     target:"_self"
   },
   {
     title: 'Assinaturas',
     caption: 'Listagem de assinaturas',
     icon: 'live_tv',
-    href: '#/assinaturas',
+    href: '#/signature',
     target:"_self"
   },
   {
     title: 'Faturas',
     caption: 'Listagem de faturas',
     icon: 'document_scanner',
-    href: '#/faturas',
+    href: '#/invoice',
     target:"_self"
   }
 ]

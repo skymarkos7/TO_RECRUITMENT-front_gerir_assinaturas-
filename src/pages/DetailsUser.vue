@@ -4,7 +4,7 @@
       <TitleComponent/>{{ title }}
     </h4>
 
-    <a href="#/cadastros" style="text-decoration: none"
+    <a href="#/user" style="text-decoration: none"
       ><q-btn
         style="margin-left: 20px; background: #ff0080; color: white"
         icon="arrow_back"
@@ -23,49 +23,91 @@
     </i>
 
     <div class="row justify-around items-center" v-if="!load">
-      <div class="posts-container cadastrodetails">
+      <div class="posts-container userdetails">
+        <q-btn title="apagar usuário" @click="deleteUser(user.id)" class="float-right delete-btn">
+          <q-icon name="delete" color="red" size="1.5em" />
+        </q-btn>
+        <q-btn title="editar usuário" @click="editing = !editing" class="float-right delete-btn">
+          <q-icon name="edit" color="green" size="1.5em" />
+        </q-btn>
         <div style="width: 100%; max-width: 800px" class="post-card">
           <div class="post-details">
             <h5 class="post-title">
-              {{ cadastros.nome }} -
-              {{ cadastros.id }}
+              {{ user.name }}
               <q-icon name="person" color="teal" size="8em" />
             </h5>
-
-            <p class="post-by">
-              <q-icon name="tag" color="teal" size="2em" />
-              Código: {{ cadastros.codigo }}
-            </p>
+            ID: #{{ user.id }}
             <a
               style="text-decoration: none; color: black"
-              :href="'mailto:' + cadastros.email"
+              :href="'mailto:' + user.mail"
               >.<br />
               <p class="post-body">
                 <q-icon name="mail" color="teal" size="2em" />
-                {{ cadastros.email }}
+                {{ user.mail }}
               </p>
             </a>
             <a
               style="text-decoration: none; color: black"
-              :href="'tel:' + cadastros.phone"
+              :href="'tel:' + user.phone"
               ><p class="post-body">
                 <q-icon name="phone" color="teal" size="2em" />
-                {{ cadastros.telefone }}
+                {{ user.phone }}
               </p></a
             >
             <p class="post-body">
                 <q-icon name="add_circle" color="teal" size="2em" />
-               Criado em: {{ cadastros.created_at }}
+               Criado em: {{ user.created_at }}
             </p>
             <p class="post-body">
               <q-icon name="update" color="teal" size="2em" />
-              Atualizado em: {{ cadastros.updated_at }}
+              Atualizado em: {{ user.updated_at }}
             </p>
 
           </div>
         </div>
       </div>
     </div>
+    <q-card v-if="editing" class="card-container">
+      <div class="container-form">
+        <q-form
+          @submit="onSubmit"
+          @reset="onReset"
+          class="q-gutter-md"
+        >
+          <q-input
+            filled
+            v-model="user.name"
+            label="Nome do usuário *"
+            lazy-rules
+            :rules="[ val => val && val.length > 0 || 'Please type name']"
+          />
+
+          <q-input
+            filled
+            v-model="user.phone"
+            label="(99) 9999-9999 *"
+            lazy-rules
+            :rules="[
+              val => !!val || 'Please type phone',
+              val => /^\(\d{2}\) \d{5}-\d{4}$/.test(val) || 'Phone must be in the format (XX) XXXXX-XXXX'
+            ]"
+          />
+
+          <q-input
+            filled
+            type="email"
+            v-model="user.mail"
+            label="Email *"
+            lazy-rules
+            :rules="[ val => val && val.length > 0 || 'Please type your email']"
+          />
+
+          <div class="div-btn" >
+            <q-btn class="btn-form" label="Salvar" type="submit" color="primary"/>
+          </div>
+        </q-form>
+      </div>
+    </q-card>
   </q-page>
 </template>
 
@@ -82,9 +124,13 @@ export default defineComponent({
   },
   data() {
     return {
-      cadastros: [],
+      user: [],
       load: false,
-      title: 'detalhes de um usuário'
+      title: 'detalhes de um usuário',
+      editing: false,
+      mail: '',
+      name: '',
+
     };
   },
   setup() {
@@ -93,23 +139,70 @@ export default defineComponent({
     };
   },
   methods: {
+    onSubmit () {
+      const url = `http://localhost:8000/api/user/update/${this.user.id}`;
+      this.loading = true;
+
+      const dataToSend = {
+        name: this.user.name,
+        mail: this.user.mail,
+        phone: this.user.phone,
+      };
+
+      api
+        .put(url, dataToSend, {
+          // headers: {  // Caso haja autenticação na chamada
+          //   jwt: this.$store.state.session.jwt
+          // }
+        })
+        .then((response) => {
+          alert('Atualizado com sucesso!')
+
+        })
+        .catch((error) => {
+
+          console.error(error.response.data.message);
+          alert(error.response.data.message)
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+
     loadData() {
       let id = this.$route.params.id;
-      const url = `http://localhost:8000/api/cadastro/get/${id}`;
+      const url = `http://localhost:8000/api/user/get/${id}`;
       this.load = true; // define load como verdadeiro antes da chamada da API
       api
         .get(url, {
         })
         .then((response) => {
 
-          this.cadastros = response.data.data;
-          // this.address = response.data.address;
-          // this.company = response.data.company;
+          this.user = response.data.data;
         })
         .finally(() => {
           this.load = false; // define load como falso após a chamada da API
         });
     },
+
+    deleteUser(id) {
+      const url = `http://localhost:8000/api/user/delete/${id}`;
+      this.load = true; // define load como verdadeiro antes da chamada da API
+      api
+        .delete(url, {
+        })
+        .then((response) => {
+
+          this.user = response.data.data;
+
+          window.location.href = '#/user';
+
+          alert('usuário apagado com sucesso');
+        })
+        .finally(() => {
+          this.load = false; // define load como falso após a chamada da API
+        });
+    }
   },
   mounted: function () {
 
@@ -123,7 +216,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 // SCOPED permite aplicar estilisação nesta únicapágina
-.cadastrodetails {
+.userdetails {
   border-radius: 50px;
   background: #ededee;
   box-shadow: 20px 20px 60px #c9c9ca, -20px -20px 60px #ffffff;
@@ -131,17 +224,52 @@ export default defineComponent({
   margin-bottom: 50px;
   padding: 10px;
 }
-.card-cadastro {
+.card-user {
   width: 100%;
   max-width: 250px;
 }
-.cadastros-container {
+
+.card-container {
+  display: flex;
+  justify-content: center;
+  background-color: #F1F4F6;
+}
+
+.container-form {
+  border-radius: 26px;
+  background: #F1F4F6;
+  box-shadow: inset 5px 5px 4px #606262,
+              inset -5px -5px 4px #ffffff;
+
+  min-width: 50%;
+}
+
+.btn-form{
+  border-radius: 26px;
+  background: #6688DF;
+  box-shadow: inset 5px 5px 4px #293659,
+              inset -5px -5px 4px #a3daff;
+
+  width: 150px;
+}
+
+.user-container {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
 }
 
-.cadastro-card {
+.div-btn {
+  display: flex;
+  justify-content: center;
+}
+
+.delete-btn{
+  margin: 10px;
+  border-radius: 15px;
+}
+
+.user-card {
   width: 300px;
   margin: 20px;
   border: 1px solid #ccc;
@@ -150,27 +278,27 @@ export default defineComponent({
   overflow: hidden;
 }
 
-.cadastro-card img {
+.user-card img {
   width: 100%;
   height: 200px;
   object-fit: cover;
 }
 
-.cadastro-details {
+.user-details {
   padding: 20px;
 }
 
-.cadastro-title {
+.user-title {
   font-size: 24px;
   margin-bottom: 10px;
 }
 
-.cadastro-by {
+.user-by {
   color: #666;
   margin-bottom: 10px;
 }
 
-.cadastro-body {
+.user-body {
   margin-bottom: 20px;
 }
 

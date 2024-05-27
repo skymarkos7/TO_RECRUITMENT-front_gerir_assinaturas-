@@ -22,7 +22,7 @@
         v-model="search"
         filled
         rounded
-        placeholder="Buscar cadastros"
+        placeholder="Buscar usuário pelo nome"
       >
         <template v-slot:append>
           <q-icon name="search" />
@@ -30,23 +30,29 @@
       </q-input>
     </div>
 
-      <div v-for="(cadastro, index) in filteredcadastros" :key="index">
+      <div v-for="(user, index) in filteredUsers" :key="index">
         <div class="q-pa-md">
           <q-card
 
-            class="card-cadastro col-auto"
+            class="card-user col-auto"
           >
             <q-card-section>
-              <a :href="url"
-                ><q-btn @click="gocadastro(cadastro.id)" class="float-right">
-                  <q-icon name="open_in_full" color="teal" size="1em" /> </q-btn
-              ></a>
+              <div class="head-card">
+                <a
+                  ><q-btn title="apagar usuário" @click="deleteUser(user.id)" class="float-right">
+                    <q-icon name="delete" color="red" size="1.2em" /> </q-btn
+                ></a>
 
-              <div class="text-h6">{{ cadastro.nome }}</div>
-              <div class="text-subtitle3">Código {{ cadastro.codigo }}</div>
-              <div class="text-subtitle3">ID: {{ cadastro.id }}</div>
-              <div class="text-subtitle3">E-mail: {{ cadastro.email }}</div>
-              <div class="text-subtitle3">Telefone: {{ cadastro.telefone }}</div>
+                <a :href="url"
+                  ><q-btn title="Expandir" @click="goUser(user.id)" class="float-right">
+                    <q-icon name="open_in_full" color="teal" size="1em" /> </q-btn
+                ></a>
+              </div>
+
+              <div class="info-user text-h6">{{ user.name }}</div>
+              <div class="info-user text-subtitle3">ID: {{ user.id }}</div>
+              <div class="info-user text-subtitle3">E-mail: <a :href="'mailto:' + user.mail"> {{ user.mail }} </a></div>
+              <div class="info-user text-subtitle3">Telefone: <a :href="'tel:' + user.phone"> {{ user.phone }} </a></div>
             </q-card-section>
 
           </q-card>
@@ -63,17 +69,17 @@ import { ref } from "vue";
 import TitleComponent from "src/components/TitleComponent.vue";
 
 export default defineComponent({
-  name: "CadastroPage",
+  name: "UserPage",
   components:{
     TitleComponent
   },
   data() {
     return {
-      cadastros: [],
+      user: [],
       load: false,
       url: '',
       search: '',
-      title: 'cadastros'
+      title: 'Usuários'
     };
   },
   setup() {
@@ -83,31 +89,49 @@ export default defineComponent({
   },
   methods: {
     loadData() {
-      const url = `http://localhost:8000/api/cadastro/getall`;
+      const url = `http://localhost:8000/api/user/getall`;
       this.load = true; // define load como verdadeiro antes da chamada da API
       api
         .get(url, {
         })
         .then((response) => {
 
-          this.cadastros = response.data.data;
+          this.user = response.data.data;
+
         })
         .finally(() => {
           this.load = false; // define load como falso após a chamada da API
         });
     },
 
-    gocadastro(id) {
+    goUser(id) {
       this.url = `#/details/${id}`; // Recebe o id e o agrega na url que será chamada
     },
+
+    deleteUser(id) {
+      const url = `http://localhost:8000/api/user/delete/${id}`;
+      this.load = true; // define load como verdadeiro antes da chamada da API
+      api
+        .delete(url, {
+        })
+        .then((response) => {
+
+          this.user = response.data.data;
+
+          alert('usuário apagado com sucesso');
+        })
+        .finally(() => {
+          this.load = false; // define load como falso após a chamada da API
+        });
+    }
   },
   mounted: function () {
 
     this.loadData();
   },
   computed:{
-    filteredcadastros() {
-      return this.cadastros.filter(cadastro => cadastro.nome.toLowerCase().includes(this.search.toLowerCase()))  // Filtrar posts pelo título
+    filteredUsers() {
+      return this.user.filter(user => user.name.toLowerCase().includes(this.search.toLowerCase()))  // Filtrar usuários pelo nome
     }
   }
 });
@@ -118,20 +142,30 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 
-.card-cadastro {
+.card-user {
+  border-radius: 30px;
   width: 100%;
   max-width: 250px;
   background-color: #f4f8f9;
               min-width: 310px;
               min-height: 250px;
 }
-.cadastros-container {
+.user-container {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
 }
 
-.cadastro-card {
+.head-card {
+  display: flex;
+  justify-content: space-between;
+}
+
+.info-user {
+  margin: 20px;
+}
+
+.user-card {
   width: 300px;
   margin: 20px;
   border: 1px solid #ccc;
@@ -140,27 +174,27 @@ export default defineComponent({
   overflow: hidden;
 }
 
-.cadastro-card img {
+.user-card img {
   width: 100%;
   height: 200px;
   object-fit: cover;
 }
 
-.cadastro-details {
+.user-details {
   padding: 20px;
 }
 
-.cadastro-title {
+.user-title {
   font-size: 24px;
   margin-bottom: 10px;
 }
 
-.cadastro-by {
+.user-by {
   color: #666;
   margin-bottom: 10px;
 }
 
-.cadastro-body {
+.user-body {
   margin-bottom: 20px;
 }
 
