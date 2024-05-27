@@ -15,6 +15,8 @@
 
 ![](src/assets/overview.gif)
 
+### - Para usar todas as funções da api utilize a [collection postmam](https://github.com/skymarkos7/TO_RECRUITMENT-api_gerir_assinaturas/blob/main/public/docs/postman_collection.json)
+
 
 ### Clonar projeto
 ```bash
